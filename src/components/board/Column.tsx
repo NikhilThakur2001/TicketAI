@@ -1,6 +1,21 @@
 import { TicketCard } from './TicketCard';
+import { BoardColumn as ColType, Ticket, Member } from '../../types';
 
-export function Column({ col, tickets, members, onTicketClick, onDragStart, onDragEnd, onDrop, onDragOver, dragOver, draggingId, onAddTicket }: any) {
+interface Props {
+  col: ColType;
+  tickets: Ticket[];
+  members: Member[];
+  onTicketClick: (t: Ticket) => void;
+  onDragStart: (e: any, id: string) => void;
+  onDragEnd: () => void;
+  onDrop: (e: any, colId: string) => void;
+  onDragOver: (colId: string) => void;
+  dragOver: string | null;
+  draggingId: string | null;
+  onAddTicket: (colId: string) => void;
+}
+
+export function Column({ col, tickets, members, onTicketClick, onDragStart, onDragEnd, onDrop, onDragOver, dragOver, draggingId, onAddTicket }: Props) {
   return (
     <div
       onDrop={e => onDrop(e, col.id)}
@@ -24,7 +39,7 @@ export function Column({ col, tickets, members, onTicketClick, onDragStart, onDr
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: "0 10px", overflowY: "auto", flex: 1 }}>
-        {tickets.map((t: any) => (
+        {tickets.map((t: Ticket) => (
           <TicketCard key={t.id} ticket={t} members={members} onClick={onTicketClick} onDragStart={onDragStart} onDragEnd={onDragEnd} isDragging={draggingId === t.id} />
         ))}
         {tickets.length === 0 && (
