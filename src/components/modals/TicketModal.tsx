@@ -1,11 +1,20 @@
 import { useState } from 'react';
 import { Avatar } from '../ui/Avatar';
 import { INIT_COLUMNS, PRIORITIES, LABEL_OPTIONS, LABEL_COLORS } from '../../lib/constants';
-import { Member } from '../../types';
+import { Member, BoardColumn, Ticket } from '../../types';
 
 function getMember(id: string | null | undefined, members: Member[]) { return members.find(m => m.id === id); }
 
-export function TicketModal({ ticket, members, columns, onClose, onSave, onDelete }: any) {
+interface Props {
+  ticket: Ticket;
+  members: Member[];
+  columns: BoardColumn[];
+  onClose: () => void;
+  onSave: (t: Ticket) => void;
+  onDelete: (id: string) => void;
+}
+
+export function TicketModal({ ticket, members, columns, onClose, onSave, onDelete }: Props) {
   const [form, setForm] = useState({ ...ticket });
   const [newComment, setNewComment] = useState("");
   const [tab, setTab] = useState("details");

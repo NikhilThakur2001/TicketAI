@@ -1,12 +1,21 @@
 import { useState } from 'react';
 import { PRIORITIES, LABEL_OPTIONS, LABEL_COLORS } from '../../lib/constants';
+import { Member, BoardColumn, Ticket } from '../../types';
 
-export function CreateTicketModal({ defaultColumn, members, columns, onClose, onCreate, nextId }: any) {
+interface Props {
+  defaultColumn: string;
+  members: Member[];
+  columns: BoardColumn[];
+  onClose: () => void;
+  onCreate: (t: Partial<Ticket>) => void;
+}
+
+export function CreateTicketModal({ defaultColumn, members, columns, onClose, onCreate }: Props) {
   const [form, setForm] = useState({ title: "", description: "", column: defaultColumn, priority: "medium", assignee: null, labels: [] as string[], due: null as string | null, storyPoints: "" });
   
   function handleCreate() {
     if (!form.title.trim()) return;
-    onCreate({ ...form, id: nextId, created: new Date().toISOString().split("T")[0], comments: [], storyPoints: form.storyPoints || null });
+    onCreate({ ...form, created: new Date().toISOString().split("T")[0], comments: [], storyPoints: form.storyPoints ? Number(form.storyPoints) : null });
     onClose();
   }
   

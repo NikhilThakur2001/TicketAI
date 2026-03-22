@@ -5,7 +5,16 @@ import { LabelTag } from '../ui/LabelTag';
 
 function getMember(id: string | null | undefined, members: Member[]) { return members.find(m => m.id === id); }
 
-export function TicketCard({ ticket, members, onClick, onDragStart, onDragEnd, isDragging }: any) {
+interface Props {
+  ticket: Ticket;
+  members: Member[];
+  onClick: (t: Ticket) => void;
+  onDragStart: (e: React.DragEvent, id: string) => void;
+  onDragEnd: () => void;
+  isDragging: boolean;
+}
+
+export function TicketCard({ ticket, members, onClick, onDragStart, onDragEnd, isDragging }: Props) {
   const assignee = getMember(ticket.assignee, members);
   const isOverdue = ticket.due && new Date(ticket.due) < new Date() && ticket.column !== "done";
   return (
