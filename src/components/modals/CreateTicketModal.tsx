@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { PRIORITIES, LABEL_OPTIONS, LABEL_COLORS } from '../../lib/constants';
 
 export function CreateTicketModal({ defaultColumn, members, columns, onClose, onCreate, nextId }: any) {
-  const [form, setForm] = useState({ title: "", description: "", column: defaultColumn, priority: "medium", assignee: null, labels: [] as string[], due: null as string | null });
+  const [form, setForm] = useState({ title: "", description: "", column: defaultColumn, priority: "medium", assignee: null, labels: [] as string[], due: null as string | null, storyPoints: "" });
   
   function handleCreate() {
     if (!form.title.trim()) return;
-    onCreate({ ...form, id: nextId, created: new Date().toISOString().split("T")[0], comments: [] });
+    onCreate({ ...form, id: nextId, created: new Date().toISOString().split("T")[0], comments: [], storyPoints: form.storyPoints || null });
     onClose();
   }
   
@@ -39,6 +39,9 @@ export function CreateTicketModal({ defaultColumn, members, columns, onClose, on
             </div>
             <div><label style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 4 }}>DUE DATE</label>
               <input type="date" value={form.due || ""} onChange={e => setForm((f: any) => ({...f, due: e.target.value || null}))} style={{ width: "100%", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 8px", fontSize: 12, boxSizing: "border-box" }} />
+            </div>
+            <div><label style={{ fontSize: 11, fontWeight: 600, color: "#6B7280", display: "block", marginBottom: 4 }}>STORY POINTS</label>
+              <input type="number" min="0" value={form.storyPoints} onChange={e => setForm((f: any) => ({...f, storyPoints: e.target.value ? parseInt(e.target.value, 10) : ""}))} placeholder="Points" style={{ width: "100%", border: "1px solid #E5E7EB", borderRadius: 6, padding: "6px 8px", fontSize: 12, boxSizing: "border-box" }} />
             </div>
           </div>
           <div>

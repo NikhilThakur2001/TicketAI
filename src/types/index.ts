@@ -19,6 +19,7 @@ export interface Ticket {
   created: string;
   due: string | null;
   comments: Comment[];
+  storyPoints?: number | null;
 }
 
 export interface Member {

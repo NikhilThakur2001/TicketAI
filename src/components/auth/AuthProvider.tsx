@@ -2,7 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "../../lib/firebase/config";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../../lib/firebase/config";
 import { useRouter, usePathname } from "next/navigation";
 
 interface AuthContextType {
@@ -19,9 +20,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
       setLoading(false);
+      
+      if (user) {
+        // Sync user to Firestore
+        const COLORS = ["#4F46E5","#0891B2","#059669","#D97706","#DC2626","#7C3AED","#DB2777","#2563EB","#65A30D","#EA580C"];
+        const name = user.displayName || user.email?.split("@")[0] || "User";
+        const email = user.email || "";
+        const initials = name.substring(0, 2).toUpperCase();
+        const color = COLORS[Math.floor(Math.abs(user.uid.split("").reduce((a,b)=>a+b.charCodeAt(0),0)) % COLORS.length)];
+        
+        await setDoc(doc(db, "users", user.uid), {
+          id: user.uid,
+          name,
+          email,
+          initials,
+          color,
+          role: "Member"
+        }, { merge: true }).catch(console.error);
+      }
       
       if (!user && pathname !== "/login") {
         router.push("/login");

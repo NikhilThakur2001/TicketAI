@@ -47,6 +47,11 @@ export function TicketCard({ ticket, members, onClick, onDragStart, onDragEnd, i
               {isOverdue ? "⚠ " : ""}{ticket.due}
             </span>
           )}
+          {ticket.storyPoints != null && (
+            <span style={{ fontSize: 10, background: "#E5E7EB", color: "#4B5563", padding: "2px 6px", borderRadius: 10, fontWeight: 600 }}>
+              {ticket.storyPoints}
+            </span>
+          )}
         </div>
       </div>
     </div>

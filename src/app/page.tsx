@@ -9,22 +9,13 @@ import { TicketModal } from "../components/modals/TicketModal";
 import { CreateTicketModal } from "../components/modals/CreateTicketModal";
 import { MembersView } from "../components/team/MembersView";
 import { Avatar } from "../components/ui/Avatar";
+import { useAuth } from "../components/auth/AuthProvider";
 
 export default function App() {
-  const loadState = () => {
-    if (typeof window === "undefined") return null;
-    try {
-      const saved = localStorage.getItem("kanban_v1");
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return null;
-  };
-
-  const saved = loadState();
-  const [tickets, setTickets] = useState<any[]>(saved?.tickets || INIT_TICKETS);
-  const [members] = useState<any[]>(saved?.members || INIT_MEMBERS);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [columns] = useState<any[]>(INIT_COLUMNS);
-  const [ticketCounter, setTicketCounter] = useState(saved?.counter || 9);
+  const [ticketCounter, setTicketCounter] = useState(1);
   const [selectedTicket, setSelectedTicket] = useState<any>(null);
   const [createFor, setCreateFor] = useState<any>(null);
   const [view, setView] = useState("board");
@@ -34,24 +25,34 @@ export default function App() {
   const [filterAssignee, setFilterAssignee] = useState("all");
   const [filterPriority, setFilterPriority] = useState("all");
   const [filterLabel, setFilterLabel] = useState("all");
+  const [selectedProject, setSelectedProject] = useState("StratAI");
+
+  const { user } = useAuth();
+  
+  useEffect(() => {
+    try { localStorage.setItem("kanban_v1", JSON.stringify({ counter: ticketCounter })); } catch {}
+  }, [ticketCounter]);
 
   useEffect(() => {
-    try { localStorage.setItem("kanban_v1", JSON.stringify({ members, counter: ticketCounter })); } catch {}
-  }, [members, ticketCounter]);
-
-  useEffect(() => {
-    const q = query(collection(db, "tickets"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const dbTickets = snapshot.docs.map(changeDoc => ({ id: changeDoc.id, ...changeDoc.data() }));
-      // Seed initial tickets if database is completely empty
-      if (dbTickets.length === 0 && tickets === INIT_TICKETS) {
-        INIT_TICKETS.forEach(t => setDoc(doc(db, "tickets", t.id), t));
-      } else if (dbTickets.length > 0) {
-        setTickets(dbTickets);
-      }
+    // Fetch users (Runs once)
+    const uq = query(collection(db, "users"));
+    const unsubUsers = onSnapshot(uq, (snapshot) => {
+      const dbUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setMembers(dbUsers);
     });
-    return () => unsubscribe();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => unsubUsers();
+  }, []); 
+
+  useEffect(() => {
+    // Fetch tickets for currently selected project
+    const tq = query(collection(db, `tickets_${selectedProject.toLowerCase()}`));
+    const unsubTickets = onSnapshot(tq, (snapshot) => {
+      const dbTickets = snapshot.docs.map(changeDoc => ({ id: changeDoc.id, ...changeDoc.data() }));
+      setTickets(dbTickets);
+    });
+    
+    return () => unsubTickets();
+  }, [selectedProject]);
 
   const filtered = tickets.filter(t => {
     if (search && !t.title.toLowerCase().includes(search.toLowerCase()) && !t.id.toLowerCase().includes(search.toLowerCase())) return false;
@@ -70,24 +71,24 @@ export default function App() {
     e.preventDefault();
     if (draggingId) {
       setTickets(ts => ts.map(t => t.id === draggingId ? { ...t, column: colId } : t));
-      setDoc(doc(db, "tickets", draggingId), { column: colId }, { merge: true });
+      setDoc(doc(db, `tickets_${selectedProject.toLowerCase()}`, draggingId), { column: colId }, { merge: true });
     }
     setDraggingId(null); setDragOver(null);
   }
 
   function handleSave(updated: any) { 
     setTickets(ts => ts.map(t => t.id === updated.id ? updated : t)); 
-    setDoc(doc(db, "tickets", updated.id), updated, { merge: true });
+    setDoc(doc(db, `tickets_${selectedProject.toLowerCase()}`, updated.id), updated, { merge: true });
   }
   function handleDelete(id: string) { 
     setTickets(ts => ts.filter(t => t.id !== id)); 
-    deleteDoc(doc(db, "tickets", id));
+    deleteDoc(doc(db, `tickets_${selectedProject.toLowerCase()}`, id));
   }
   function handleCreate(ticket: any) {
-    const id = `TEAM-${String(ticketCounter).padStart(3, "0")}`;
+    const id = `${selectedProject.substring(0,6).toUpperCase()}-${String(ticketCounter).padStart(3, "0")}`;
     const newTicket = { ...ticket, id };
     setTickets(ts => [...ts, newTicket]);
-    setDoc(doc(db, "tickets", id), newTicket);
+    setDoc(doc(db, `tickets_${selectedProject.toLowerCase()}`, id), newTicket);
     setTicketCounter(n => n + 1);
   }
 
@@ -104,8 +105,12 @@ export default function App() {
           <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="white" opacity="0.9"/><rect x="7" y="1" width="4" height="10" rx="1.5" fill="white" opacity="0.7"/><rect x="13" y="1" width="2" height="7" rx="1" fill="white" opacity="0.5"/></svg>
           </div>
-          <span style={{ fontWeight: 800, fontSize: 15, color: "#111827", letterSpacing: "-0.3px" }}>TeamFlow</span>
-          <span style={{ fontSize: 11, color: "#9CA3AF", background: "#F3F4F6", padding: "2px 7px", borderRadius: 6, fontWeight: 600 }}>v1.0</span>
+          <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ fontWeight: 800, fontSize: 16, color: "#111827", border: "none", outline: "none", background: "transparent", cursor: "pointer", fontFamily: "inherit", appearance: "none", letterSpacing: "-0.3px" }}>
+            <option value="StratAI">StratAI</option>
+            <option value="VibeCapAI">VibeCapAI</option>
+          </select>
+          <svg style={{ marginLeft: -6, color: "#9CA3AF" }} width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+          <span style={{ fontSize: 11, color: "#9CA3AF", background: "#F3F4F6", padding: "2px 7px", borderRadius: 6, fontWeight: 600, marginLeft: 6 }}>v1.0</span>
         </div>
 
         <div style={{ display: "flex", gap: 2, marginRight: "auto" }}>

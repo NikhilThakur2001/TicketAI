@@ -116,6 +116,9 @@ export function TicketModal({ ticket, members, columns, onClose, onSave, onDelet
               { label: "Due Date", content: (
                 <input type="date" value={form.due || ""} onChange={e => setForm((f: any) => ({...f, due: e.target.value || null}))} style={{ width: "100%", border: "1px solid #E5E7EB", borderRadius: 6, padding: "5px 8px", fontSize: 12, background: "#fff", boxSizing: "border-box" }} />
               )},
+              { label: "Story Points", content: (
+                <input type="number" min="0" value={form.storyPoints || ""} onChange={e => setForm((f: any) => ({...f, storyPoints: e.target.value ? parseInt(e.target.value, 10) : null}))} style={{ width: "100%", border: "1px solid #E5E7EB", borderRadius: 6, padding: "5px 8px", fontSize: 12, background: "#fff", boxSizing: "border-box" }} placeholder="Points" />
+              )},
               { label: "Created", content: <span style={{ fontSize: 12, color: "#6B7280" }}>{form.created}</span> },
             ].map(({ label, content }) => (
               <div key={label}>
