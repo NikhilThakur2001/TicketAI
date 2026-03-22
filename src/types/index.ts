@@ -1,5 +1,6 @@
-export type TicketPriority = "critical" | "high" | "medium" | "low";
-export type ColumnId = "backlog" | "todo" | "inprogress" | "review" | "done";
+export type TicketPriority = "low" | "medium" | "high" | "critical";
+
+export type ColumnId = "todo" | "inprogress" | "review" | "done";
 
 export interface Comment {
   id: string;
@@ -27,11 +28,12 @@ export interface Member {
   name: string;
   initials: string;
   color: string;
-  role: string;
+  email?: string;
+  role?: string;
 }
 
 export interface BoardColumn {
-  id: string;
+  id: ColumnId | string;
   title: string;
   color: string;
 }

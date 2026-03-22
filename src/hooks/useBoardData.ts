@@ -50,9 +50,20 @@ export function useBoardData(selectedProject: string) {
   }, [selectedProject]);
 
   const saveTicket = useCallback((updated: Ticket) => {
-    setTickets(ts => ts.map(t => t.id === updated.id ? updated : t));
+    setTickets(ts => {
+      const oldTicket = ts.find(t => t.id === updated.id);
+      if (oldTicket && oldTicket.assignee !== updated.assignee && updated.assignee) {
+        const u = members.find(m => m.id === updated.assignee);
+        if (u?.email) {
+          fetch("/api/send-email", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({
+            to: u.email, subject: `Ticket Reassigned: ${updated.id}`, text: `You've been reassigned ticket ${updated.id}: ${updated.title}`
+          })}).catch(() => {});
+        }
+      }
+      return ts.map(t => t.id === updated.id ? updated : t);
+    });
     setDoc(doc(db, `tickets_${selectedProject.toLowerCase()}`, updated.id), updated, { merge: true });
-  }, [selectedProject]);
+  }, [selectedProject, members]);
 
   const deleteTicket = useCallback((id: string) => {
     setTickets(ts => ts.filter(t => t.id !== id));
@@ -65,7 +76,16 @@ export function useBoardData(selectedProject: string) {
     setTickets(ts => [...ts, newTicket]);
     setDoc(doc(db, `tickets_${selectedProject.toLowerCase()}`, id), newTicket);
     setTicketCounter(n => n + 1);
-  }, [selectedProject, ticketCounter]);
+    
+    if (newTicket.assignee) {
+      const u = members.find(m => m.id === newTicket.assignee);
+      if (u?.email) {
+        fetch("/api/send-email", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify({
+          to: u.email, subject: `New Assignment: ${id}`, text: `You've been assigned ticket ${id}: ${newTicket.title}`
+        })}).catch(() => {});
+      }
+    }
+  }, [selectedProject, ticketCounter, members]);
 
   return { tickets, members, moveTicket, saveTicket, deleteTicket, createTicket };
 }

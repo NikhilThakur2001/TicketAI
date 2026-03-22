@@ -4,6 +4,7 @@ import { useState } from "react";
 import { INIT_COLUMNS } from "../lib/constants";
 import { Column } from "../components/board/Column";
 import { TicketModal } from "../components/modals/TicketModal";
+import { EditTicketModal } from "../components/modals/EditTicketModal";
 import { CreateTicketModal } from "../components/modals/CreateTicketModal";
 import { MembersView } from "../components/team/MembersView";
 import { Header } from "../components/layout/Header";
@@ -20,6 +21,7 @@ export default function App() {
 
   const [columns] = useState(INIT_COLUMNS);
   const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [editTicket, setEditTicket] = useState<Ticket | null>(null);
   const [createFor, setCreateFor] = useState<string | null>(null);
   
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -88,6 +90,12 @@ export default function App() {
                 dragOver={dragOver}
                 draggingId={draggingId}
                 onAddTicket={setCreateFor}
+                onEdit={setEditTicket}
+                onDelete={(id) => {
+                  if (window.confirm("Are you sure you want to permanently delete this ticket?")) {
+                    deleteTicket(id);
+                  }
+                }}
               />
             ))}
           </div>
@@ -101,7 +109,15 @@ export default function App() {
           columns={columns}
           onClose={() => setSelectedTicket(null)}
           onSave={saveTicket}
-          onDelete={deleteTicket}
+        />
+      )}
+      {editTicket && (
+        <EditTicketModal
+          ticket={editTicket}
+          members={members}
+          columns={columns}
+          onClose={() => setEditTicket(null)}
+          onSave={saveTicket}
         />
       )}
       {createFor && (
