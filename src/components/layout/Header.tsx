@@ -19,23 +19,32 @@ export function Header({ selectedProject, setSelectedProject, view, setView, tic
 
   return (
     <div style={{ background: "#fff", borderBottom: "1px solid #E5E7EB", padding: "0 28px", display: "flex", alignItems: "center", gap: 0, height: 56, position: "sticky", top: 0, zIndex: 100 }}>
-      {/* Brand & Project Selector */}
+      {/* Brand */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginRight: 32 }}>
         <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="white" opacity="0.9"/><rect x="7" y="1" width="4" height="10" rx="1.5" fill="white" opacity="0.7"/><rect x="13" y="1" width="2" height="7" rx="1" fill="white" opacity="0.5"/></svg>
         </div>
-        <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ fontWeight: 800, fontSize: 16, color: "#111827", border: "none", outline: "none", background: "transparent", cursor: "pointer", fontFamily: "inherit", appearance: "none", letterSpacing: "-0.3px" }}>
-          <option value="StratAI">StratAI</option>
-          <option value="VibeCapAI">VibeCapAI</option>
-        </select>
-        <svg style={{ marginLeft: -6, color: "#9CA3AF" }} width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+        <span style={{ fontWeight: 800, fontSize: 15, color: "#111827", letterSpacing: "-0.3px" }}>TeamFlow</span>
+        <span style={{ fontSize: 11, color: "#9CA3AF", background: "#F3F4F6", padding: "2px 7px", borderRadius: 6, fontWeight: 600 }}>v1.0</span>
       </div>
 
-      {/* View Toggles */}
-      <div style={{ display: "flex", gap: 2, marginRight: "auto" }}>
-        {[["board", "Board"], ["members", "Team"]].map(([v, label]) => (
-          <button key={v} onClick={() => setView(v)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: view === v ? "#EEF2FF" : "none", color: view === v ? "#4F46E5" : "#6B7280", fontWeight: view === v ? 600 : 400, cursor: "pointer", fontSize: 13, transition: "all 0.15s" }}>{label}</button>
-        ))}
+      {/* Navigation (Project Dropdown + View Toggles) */}
+      <div style={{ display: "flex", gap: 12, marginRight: "auto", alignItems: "center" }}>
+        <div style={{ position: "relative" }}>
+          <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)} style={{ padding: "6px 28px 6px 14px", borderRadius: 7, border: "1px solid #E5E7EB", background: "#fff", color: "#374151", fontWeight: 600, cursor: "pointer", fontSize: 13, appearance: "none", outline: "none" }}>
+            <option value="StratAI">Project: StratAI</option>
+            <option value="VibeCapAI">Project: VibeCapAI</option>
+          </select>
+          <svg style={{ position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)", color: "#9CA3AF", pointerEvents: "none" }} width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+        </div>
+        
+        <div style={{ width: 1, height: 20, background: "#E5E7EB" }} /> {/* Divider */}
+        
+        <div style={{ display: "flex", gap: 2 }}>
+          {[["board", "Board"], ["members", "Team"]].map(([v, label]) => (
+            <button key={v} onClick={() => setView(v)} style={{ padding: "6px 14px", borderRadius: 7, border: "none", background: view === v ? "#EEF2FF" : "none", color: view === v ? "#4F46E5" : "#6B7280", fontWeight: view === v ? 600 : 400, cursor: "pointer", fontSize: 13, transition: "all 0.15s" }}>{label}</button>
+          ))}
+        </div>
       </div>
 
       {/* Stats strip */}
